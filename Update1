@@ -1,0 +1,167 @@
+using System;
+using System.Collections.Generic;
+
+namespace ChatbotApp
+{
+    // ================= INTERFACE =================
+    public interface IChatbot
+    {
+        string GetResponse(string userInput);
+    }
+
+    // ================= BASE CLASS =================
+    public class ChatbotBase : IChatbot
+    {
+        protected Dictionary<string, string> exactResponses;
+        protected Dictionary<string, string> keywordResponses;
+
+        public ChatbotBase()
+        {
+            exactResponses = new Dictionary<string, string>()
+            {
+                { "hello", "Hi there! Welcome to Cybersecurity Assistant." },
+                { "how are you", "I'm operating smoothly and ready to help keep you safe online." },
+                { "bye", "Goodbye! Stay safe online." },
+                { "help", "I can assist you with password security, phishing detection, and safe browsing practices." }
+            };
+
+            keywordResponses = new Dictionary<string, string>()
+            {
+                { "password", "PASSWORD SECURITY:\nUse 12-16+ character passphrases with upper, lower, numbers & symbols.\nNever reuse passwords.\nUse a password manager.\nEnable 2FA/MFA.\nChange passwords if breached." },
+
+                { "2fa", "TWO-FACTOR AUTHENTICATION:\nEnable 2FA wherever possible.\nAuthenticator apps are safer than SMS.\nHardware keys are most secure.\nAvoid SMS when possible." },
+
+                { "mfa", "MULTI-FACTOR AUTHENTICATION:\nUses password + device/biometric.\nUse backup codes.\nEnable on all important accounts.\nNever share codes." },
+
+                { "phishing", "PHISHING DETECTION:\nCheck sender emails carefully.\nHover over links.\nAvoid urgent suspicious messages.\nVerify requests independently." },
+
+                { "scam", "COMMON SCAMS:\nFake job offers.\nPrize scams.\nTech support scams.\nRomance scams.\nIf it seems too good to be true, it is." },
+
+                { "browsing", "SAFE BROWSING:\nUse HTTPS sites.\nKeep software updated.\nAvoid suspicious downloads.\nUse ad blockers." },
+
+                { "wifi", "PUBLIC WIFI SAFETY:\nAvoid sensitive logins.\nUse a VPN.\nDisable auto-connect.\nUse hotspot if possible." },
+
+                { "vpn", "VPN:\nEncrypts your traffic.\nHides IP address.\nUseful on public networks.\nDoes not make you fully anonymous." },
+
+                { "malware", "MALWARE PROTECTION:\nInstall antivirus.\nAvoid unknown downloads.\nKeep system updated.\nRun regular scans." },
+
+                { "breach", "DATA BREACH:\nChange passwords immediately.\nEnable 2FA.\nMonitor accounts.\nContact your bank if needed." },
+
+                { "privacy", "ONLINE PRIVACY:\nLimit shared info.\nAdjust privacy settings.\nUse secure search engines.\nAvoid tracking." },
+
+                { "social", "SOCIAL MEDIA SECURITY:\nUse strong passwords.\nEnable 2FA.\nAvoid unknown friend requests.\nLimit personal info." },
+
+                { "email", "EMAIL SECURITY:\nUse strong password.\nEnable 2FA.\nAvoid suspicious links.\nUse spam filters." },
+
+                { "code", "SECURE CODING:\nValidate input.\nUse encryption.\nAvoid hardcoding secrets.\nUpdate dependencies." },
+
+                { "backup", "DATA BACKUP:\nFollow 3-2-1 rule.\nUse cloud + local storage.\nTest backups regularly." }
+            };
+        }
+
+        public virtual string GetResponse(string userInput)
+        {
+            string input = userInput.ToLower().Trim();
+
+            if (exactResponses.ContainsKey(input))
+            {
+                return exactResponses[input];
+            }
+
+            foreach (var keyword in keywordResponses.Keys)
+            {
+                if (input.Contains(keyword))
+                {
+                    return keywordResponses[keyword];
+                }
+            }
+
+            return "I'm not sure about that topic. Try asking about cybersecurity topics.";
+        }
+    }
+
+    // ================= CHILD CLASS =================
+    public class SmartCybersecurityChatbot : ChatbotBase
+    {
+        public override string GetResponse(string userInput)
+        {
+            string input = userInput.ToLower().Trim();
+
+            if (input.Contains("best practices"))
+            {
+                return "CYBERSECURITY BEST PRACTICES:\n1. Use strong passwords\n2. Enable 2FA\n3. Avoid suspicious links\n4. Keep software updated\n5. Use secure networks\n6. Backup data";
+            }
+
+            if (input.Contains("tips"))
+            {
+                return "QUICK TIPS:\nVerify before clicking\nDo not share sensitive info\nKeep devices updated\nUse strong passwords";
+            }
+
+            if (input.Contains("history"))
+            {
+                return "Type 'show history' to see our conversation.";
+            }
+
+            return base.GetResponse(userInput);
+        }
+    }
+
+    // ================= MAIN PROGRAM =================
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            List<string> chatHistory = new List<string>();
+            IChatbot bot = new SmartCybersecurityChatbot();
+
+            Console.WriteLine("=== CYBERSECURITY ASSISTANT CHATBOT ===");
+            Console.WriteLine("Type 'help', 'show history', or 'exit'\n");
+
+            while (true)
+            {
+                try
+                {
+                    Console.Write("You: ");
+                    string userInput = Console.ReadLine() ?? "";
+
+                    string cleanedInput = userInput.ToLower().Trim();
+
+                    if (cleanedInput == "exit")
+                    {
+                        Console.WriteLine("Bot: Goodbye. Stay safe.");
+                        break;
+                    }
+
+                    if (cleanedInput == "show history")
+                    {
+                        if (chatHistory.Count == 0)
+                        {
+                            Console.WriteLine("Chat history is empty.\n");
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n--- CHAT HISTORY ---");
+                            foreach (var msg in chatHistory)
+                            {
+                                Console.WriteLine(msg);
+                            }
+                            Console.WriteLine("--------------------\n");
+                        }
+                        continue;
+                    }
+
+                    string response = bot.GetResponse(userInput);
+
+                    chatHistory.Add("You: " + userInput);
+                    chatHistory.Add("Bot: " + response);
+
+                    Console.WriteLine("Bot: " + response);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message);
+                }
+            }
+        }
+    }
+}
