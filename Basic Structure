@@ -1,0 +1,217 @@
+using System;
+using System.Collections.Generic;
+
+namespace ChatbotApp
+{
+    // ================= INTERFACE =================
+    public interface IChatbot
+    {
+        string GetResponse(string userInput);
+    }
+
+    // ================= BASE CLASS =================
+    public class ChatbotBase : IChatbot
+    {
+        protected Dictionary<string, string> exactResponses;
+        protected Dictionary<string, string> keywordResponses;
+
+        public ChatbotBase()
+        {
+            // Exact phrase responses
+            exactResponses = new Dictionary<string, string>()
+            {
+                { "hello", "Hi there! Welcome to Cybersecurity Assistant." },
+                { "how are you", "I'm operating smoothly and ready to help keep you safe online!" },
+                { "bye", "Goodbye! Stay safe online!" },
+                { "help", "I can assist you with password security, phishing detection, and safe browsing practices." }
+            };
+
+            // Keyword-based responses
+            keywordResponses = new Dictionary<string, string>()
+            {
+                { "password", " PASSWORD SECURITY:\n• Use 12-16+ character passphrases with upper, lower, numbers & symbols\n• Never reuse passwords across sites\n• Use a password manager (LastPass, 1Password, Bitwarden)\n• Enable 2FA/MFA whenever available\n• Change passwords immediately if breached" },
+                
+                { "2fa", " TWO-FACTOR AUTHENTICATION:\n• Always enable 2FA/MFA where available\n• Authenticator apps (Google Auth, Microsoft Auth) are safer than SMS\n• Hardware security keys (YubiKey) provide the best protection\n• SMS is vulnerable to SIM swapping attacks\n• 2FA significantly reduces account compromise risk" },
+                
+                { "mfa", " MULTI-FACTOR AUTHENTICATION:\n• Combines something you know (password), have (phone), or are (biometric)\n• Authenticator apps are more secure than SMS codes\n• Use backup codes and store them safely offline\n• Enable MFA on all critical accounts (email, banking, social media)\n• Never share MFA codes with anyone" },
+                
+                { "phishing", " PHISHING DETECTION:\n• Check sender email addresses carefully - watch for subtle misspellings\n• Hover over links before clicking to see the actual URL\n• Be suspicious of urgent requests, especially for passwords or personal info\n• Look for generic greetings instead of your real name\n• Watch for poor grammar and spelling errors\n• Verify requests independently using known contact info\n• Never click links in unexpected emails - go directly to websites instead" },
+                
+                { "scam", "️ COMMON SCAMS:\n• CEO fraud: Fake urgent requests from 'executives' asking for wire transfers\n• Tech support scams: Pop-ups claiming your device has malware\n• Prize/lottery scams: You won something you never entered!\n• Job offer scams: Too-good-to-be-true remote job offers\n• Romance scams: Building trust then asking for money\n• Tax/IRS scams: Threatening legal action if you don't pay immediately\n• Rule: If it seems too good or too urgent to be true, it probably is!" },
+                
+                { "browsing", " SAFE BROWSING:\n• Keep your browser, plugins, and OS updated regularly\n• Only enter sensitive data on HTTPS (secure) websites\n• Avoid downloading files from unknown or untrusted sources\n• Don't click on suspicious pop-ups or ads\n• Use browser extensions: uBlock Origin, Privacy Badger, HTTPS Everywhere\n• Enable 'Do Not Track' and pop-up blockers\n• Clear cookies and cache regularly\n• Disable JavaScript if visiting untrusted sites" },
+                
+                { "wifi", " PUBLIC WI-FI SAFETY:\n• Avoid logging into sensitive accounts on public networks\n• Never conduct banking or access passwords on public Wi-Fi\n• Use a reputable VPN (ExpressVPN, NordVPN, ProtonVPN) for all public Wi-Fi\n• Enable your device's firewall and disable file sharing\n• Turn off auto-connect features\n• Use your mobile hotspot instead when handling sensitive data\n• Be cautious of fake hotspots with legitimate-sounding names" },
+                
+                { "vpn", " VPN (Virtual Private Network):\n• Encrypts all your internet traffic from your ISP and network\n• Masks your IP address and location\n• Use for: public Wi-Fi, travel, avoiding ISP tracking\n• Choose reputable providers with no-log policies\n• VPN does NOT make you completely anonymous online\n• Connect to VPN before accessing any sensitive accounts\n• Don't assume VPN alone protects you from malware or phishing" },
+                
+                { "malware", " MALWARE PROTECTION:\n• Install reputable antivirus software (Windows Defender, Malwarebytes, Norton)\n• Never download software from untrusted sources\n• Be cautious with email attachments from unknown senders\n• Don't click suspicious links or pop-ups\n• Keep your OS and all software up to date with security patches\n• Run regular antivirus/malware scans\n• Use browser extensions that block malicious sites\n• Avoid pirated software and 'crack' downloads" },
+                
+                { "breach", " IF YOUR DATA IS BREACHED:\n• Check if compromised at haveibeenpwned.com\n• Change passwords immediately, starting with email\n• Enable 2FA/MFA if not already active\n• Monitor accounts for suspicious activity\n• Watch for phishing attempts targeting you\n• Consider credit freeze with credit bureaus (Equifax, Experian, TransUnion)\n• For financial accounts, contact your bank directly\n• Document everything and consider credit monitoring services" },
+                
+                { "privacy", " ONLINE PRIVACY:\n• Review privacy settings on social media accounts\n• Limit what personal info you share publicly\n• Use privacy-focused search engines (DuckDuckGo, StartPage)\n• Opt-out of data broker lists if possible\n• Use ephemeral/temporary email addresses for sign-ups\n• Be cautious with tracking cookies - use browser extensions\n• Don't share location data unless necessary\n• Read privacy policies before using services" },
+                
+                { "social", " SOCIAL MEDIA SECURITY:\n• Use strong, unique passwords for each platform\n• Enable 2FA/MFA on all accounts\n• Review privacy settings - limit who can message/contact you\n• Be cautious of friend requests from unknown people\n• Don't click suspicious links shared by 'friends' (account compromise)\n• Avoid oversharing personal details (mother's maiden name, etc.)\n• Turn off location tracking and tag notifications\n• Report suspicious accounts and phishing attempts" },
+                
+                { "email", " EMAIL SECURITY:\n• Use a strong, unique password and enable 2FA\n• Set up email recovery options (phone, backup email)\n• Review connected apps and revoke suspicious access\n• Unsubscribe from unwanted mailing lists\n• Be cautious with email forwarding rules (attackers use these)\n• Use email aliases/temporary addresses for sign-ups\n• Enable spam filters and block senders as needed\n• Never reply to suspicious emails - delete or report instead" },
+                
+                { "code", " SECURE CODING:\n• Always validate and sanitize user input\n• Use parameterized queries to prevent SQL injection\n• Implement proper access controls and authentication\n• Encrypt sensitive data in transit (HTTPS) and at rest\n• Use secure password hashing (bcrypt, Argon2)\n• Keep dependencies and frameworks updated\n• Never hardcode passwords or API keys\n• Use environment variables for secrets management" },
+                
+                { "backup", " DATA BACKUP STRATEGY:\n• Follow the 3-2-1 rule: 3 copies, 2 different media, 1 offsite\n• Use cloud backup (Google Drive, OneDrive, iCloud)\n• Keep local backups on external drives\n• Test your backups regularly to ensure they work\n• Encrypt backups with strong passwords\n• Keep backups separate from connected devices (prevent ransomware)\n• Automate regular backups if possible\n• Store offsite backups in a secure location" }
+            };
+        }
+
+        
+        public virtual string GetResponse(string userInput)
+        {
+            var input = userInput.ToLower().Trim();
+
+            // 1. Check match
+            if (exactResponses.ContainsKey(input))
+            {
+                return exactResponses[input];
+            }
+
+            // 2. Check keywords match
+            foreach (var keyword in keywordResponses.Keys)
+            {
+                if (input.Contains(keyword))
+                {
+                    return keywordResponses[keyword];
+                }
+            }
+
+            return "I'm not sure about that topic. Try asking about: password, 2fa, phishing, scam, browsing, wifi, vpn, malware, breach, privacy, social, email, code, or backup.";
+        }
+    }
+
+    // ================= CHILD CLASS =================
+    public class SmartCybersecurityChatbot : ChatbotBase
+    {
+        public override string GetResponse(string userInput)
+        {
+            var input = userInput.ToLower().Trim();
+
+            // Extra smart responses
+            if (input.Contains("best practices"))
+            {
+                return " CYBERSECURITY BEST PRACTICES:\n1. Use unique, strong passwords with 2FA\n2. Never click links in unsolicited emails\n3. Keep software updated\n4. Use HTTPS-only sites\n5. Use VPN on public Wi-Fi\n6. Enable MFA on all important accounts\n7. Regular backups using 3-2-1 rule\n8. Stay informed about current threats";
+            }
+
+            if (input.Contains("tips"))
+            {
+                return " QUICK TIPS:\n• Always verify before clicking\n• When in doubt, don't share it\n• Keep your devices updated\n• Use strong, unique passwords\n• Trust your instincts\n• If you're unsure, ask an expert";
+            }
+
+            if (input.Contains("history"))
+            {
+                return "Type 'show history' to see our conversation.";
+            }
+
+            if (input.Contains("cybersecurity") || input.Contains("security"))
+            {
+                return " Cybersecurity is the practice of protecting systems, networks, and data from digital attacks. Ask me about: passwords, phishing, safe browsing, 2FA, malware, breaches, VPNs, and more!";
+            }
+
+            return base.GetResponse(userInput);
+        }
+    }
+
+    // ================= MAIN PROGRAM =================
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string? userInput = null;
+
+            // Chat history list
+            List<string> chatHistory = new List<string>();
+
+            IChatbot bot = new SmartCybersecurityChatbot();
+
+            Console.WriteLine("╔════════════════════════════════════════════╗");
+            Console.WriteLine("║    CYBERSECURITY ASSISTANT CHATBOT         ║");
+            Console.WriteLine("║  Stay Safe Online - Learn Best Practices   ║");
+            Console.WriteLine("╚════════════════════════════════════════════╝\n");
+            Console.WriteLine("Commands: 'help', 'show history', or ask about cybersecurity topics!\n");
+
+            while (true)
+            {
+                try
+                {
+                    Console.Write("You: ");
+                    userInput = Console.ReadLine();
+
+                    if (userInput == null)
+                    {
+                        throw new Exception("Input cannot be null.");
+                    }
+
+                    var cleanedInput = userInput.ToLower().Trim();
+
+                    // Exit condition
+                    if (cleanedInput == "exit" || cleanedInput == "quit")
+                    {
+                        Console.WriteLine("Bot: Goodbye! Remember: Stay vigilant, stay safe! 🔒\n");
+                        break;
+                    }
+
+                    // Show help
+                    if (cleanedInput == "help" || cleanedInput == "topics")
+                    {
+                        Console.WriteLine("\n AVAILABLE TOPICS:");
+                        Console.WriteLine("• password      - Password security best practices");
+                        Console.WriteLine("• 2fa/mfa       - Two/Multi-factor authentication");
+                        Console.WriteLine("• phishing      - Detect and avoid phishing attacks");
+                        Console.WriteLine("• scam          - Common scam tactics");
+                        Console.WriteLine("• browsing      - Safe web browsing habits");
+                        Console.WriteLine("• wifi          - Public Wi-Fi safety");
+                        Console.WriteLine("• vpn           - Virtual Private Networks");
+                        Console.WriteLine("• malware       - Malware protection");
+                        Console.WriteLine("• breach        - What to do if breached");
+                        Console.WriteLine("• privacy       - Online privacy tips");
+                        Console.WriteLine("• social        - Social media security");
+                        Console.WriteLine("• email         - Email account security");
+                        Console.WriteLine("• code          - Secure coding practices");
+                        Console.WriteLine("• backup        - Data backup strategies");
+                        Console.WriteLine("• best practices - Top 8 cybersecurity practices");
+                        Console.WriteLine("• show history  - View chat history\n");
+                        continue;
+                    }
+
+                    // Show chat history
+                    if (cleanedInput == "show history")
+                    {
+                        if (chatHistory.Count == 0)
+                        {
+                            Console.WriteLine(" Chat History (empty)\n");
+                        }
+                        else
+                        {
+                            Console.WriteLine("\n --- CHAT HISTORY ---");
+                            foreach (var message in chatHistory)
+                            {
+                                Console.WriteLine(message);
+                            }
+                            Console.WriteLine("---------------------\n");
+                        }
+                        continue;
+                    }
+
+                    // Get response
+                    var response = bot.GetResponse(userInput);
+
+                    // Store in history
+                    chatHistory.Add("You: " + userInput);
+                    chatHistory.Add("Bot: " + response);
+
+                    Console.WriteLine("Bot: " + response + "\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error: " + ex.Message + "\n");
+                }
+            }
+        }
+    }
+}
